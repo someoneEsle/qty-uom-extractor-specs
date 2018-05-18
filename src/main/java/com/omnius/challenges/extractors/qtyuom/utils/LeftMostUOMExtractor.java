@@ -1,12 +1,14 @@
 package com.omnius.challenges.extractors.qtyuom.utils;
 
 import com.omnius.challenges.extractors.qtyuom.QtyUomExtractor;
-import com.omnius.challenges.extractors.qtyuom.utils.Pair;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Implements {@link QtyUomExtractor} identifying as <strong>the most relevant UOM</strong> the leftmost UOM found in the articleDescription.
  * The {@link UOM} array contains the list of valid UOMs. The algorithm search for the leftmost occurence of UOM[i], if there are no occurrences then tries UOM[i+1].
- * 
+ *
  * Example
  * <ul>
  * <li>article description: "black steel bar 35 mm 77 stck"</li>
@@ -23,19 +25,36 @@ public class LeftMostUOMExtractor implements QtyUomExtractor {
      * Array of valid UOM to match. the elements with lower index in the array has higher priority
      */
     public static String[] UOM = {"stk", "stk.", "stck", "stück", "stg", "stg.", "st", "st.", "stange", "stange(n)", "tafel", "tfl", "taf", "mtr", "meter", "qm", "kg", "lfm", "mm", "m"};
-    
+
     public LeftMostUOMExtractor() {}
-    
+
     @Override
     public Pair<String, String> extract(String articleDescription) {
-        //mock implementation
-        return new Pair<String, String>("54.7","mm");
+        if (articleDescription == null) {
+            return null;
+        }
+        String patternQTY = "(^|\\s+)\\d{1,3}((,|\\s)\\d{3})*(\\s*(.|,)\\s*\\d+)?";
+        String patternPair;
+        Pattern pattern;
+        Matcher matcher;
+        String matchingString;
+        for (String uom : UOM) {
+            patternPair = patternQTY + "\\s*(?i)" + uom + "(\\s+|$)";
+            pattern = Pattern.compile(patternPair);
+            matcher = pattern.matcher(articleDescription);
+            if (matcher.find()) {
+                matchingString = matcher.group();
+                return new Pair<>(matchingString.substring(0, matchingString.length() - 1 - uom.length()).trim().
+                        replace(" ", ""), uom);
+            }
+        }
+        return null;
     }
 
     @Override
     public Pair<Double, String> extractAsDouble(String articleDescription) {
-        //mock implementation
-        return new Pair<Double, String>(34.5d,"m");
+        Pair<String, String> pair = extract(articleDescription);
+        return new Pair<>(Double.parseDouble(pair.getFirst()), pair.getSecond());
     }
 
 
