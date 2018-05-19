@@ -218,26 +218,26 @@ public class QtyUomExtractorTest extends Assert{
         QtyUomExtractor myMatcher = new LeftMostUOMExtractor();
         BufferedReader br = null;
         String stringToCheck;
-        String qty;
-        String uom;
-        String qtyResult;
-        String uomResult;
+        String qty; //qty as extracted from the csv field
+        String uom; //uom as extracted from the csv field
+        String qtyResult; //qty as extracted by my algorithm
+        String uomResult; //uom as extracted by my algorithm
         String line = "";
         double total = 0;
         double correct = 0;
-        Regex CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+        // pattern that matches qty and uom in the csv
+        Pattern pattern = Pattern.compile(",\"(.+)\",\"(.+)\"");
         try {
             br = new BufferedReader(new FileReader("resources/qty_uom_challenge_dataset_clean.csv"));
         while ((line = br.readLine()) != null) {
             stringToCheck = "";
             qty = "";
             uom = "";
-            Pattern pattern = Pattern.compile(",\"(.*)\",\"(.+)\"");
             Matcher matcher = pattern.matcher(line);
             matcher.find();
-            qty = matcher.group(1);
-            uom = matcher.group(2);
-            stringToCheck = line.substring(1,line.length()-7-qty.length()-uom.length());
+            qty = matcher.group(1); //extract the expected qty from the csv
+            uom = matcher.group(2); //extract the expected uom from the csv
+            stringToCheck = line.substring(1,line.length()-7-qty.length()-uom.length()); //articleDescription
             Pair<String, String> result = myMatcher.extract(stringToCheck);
             try {
                 qtyResult = result.getFirst();

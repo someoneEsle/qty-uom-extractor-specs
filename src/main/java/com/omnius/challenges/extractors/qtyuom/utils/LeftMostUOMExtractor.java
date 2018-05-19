@@ -33,16 +33,19 @@ public class LeftMostUOMExtractor implements QtyUomExtractor {
         if (articleDescription == null) {
             return null;
         }
+        //patterns to extract QTY
         String patternQTY = "(^|\\s+)\\d{1,3}((,|\\s)\\d{3})*(\\s*(.|,)\\s*\\d+)?";
         String patternPair;
         Pattern pattern;
         Matcher matcher;
         String matchingString;
         for (String uom : UOM) {
+            //combine qty and uom in one pattern
             patternPair = patternQTY + "\\s*(?i)" + uom + "(\\s+|$)";
             pattern = Pattern.compile(patternPair);
             matcher = pattern.matcher(articleDescription);
             if (matcher.find()) {
+                //extract the string that matches the pattern
                 matchingString = matcher.group();
                 return new Pair<>(matchingString.substring(0, matchingString.length() - 1 - uom.length()).trim().
                         replace(" ", ""), uom);
