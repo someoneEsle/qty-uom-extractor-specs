@@ -1,11 +1,17 @@
 package com.omnius.challenges.extractors.qtyuom;
 
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.omnius.challenges.extractors.qtyuom.QtyUomExtractor;
 import com.omnius.challenges.extractors.qtyuom.utils.LeftMostUOMExtractor;
 import com.omnius.challenges.extractors.qtyuom.utils.Pair;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -209,10 +215,46 @@ public class QtyUomExtractorTest extends Assert{
     
     @Test
     public void computeAccuracy_checkIsHigherThan20Percent() {
-        // Load provided CSV
-        // For each line in the CSV run the LeftMostUOMExtractor
-        // calculate how many corrected guess your algorithm compute
-        // Assert the accuracy higher than 20%
+        QtyUomExtractor myMatcher = new LeftMostUOMExtractor();
+        BufferedReader br = null;
+        String stringToCheck;
+        String qty;
+        String uom;
+        String qtyResult;
+        String uomResult;
+        String line = "";
+        double total = 0;
+        double correct = 0;
+        Regex CSVParser = new Regex(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
+        try {
+            br = new BufferedReader(new FileReader("resources/qty_uom_challenge_dataset_clean.csv"));
+        while ((line = br.readLine()) != null) {
+            stringToCheck = "";
+            qty = "";
+            uom = "";
+            Pattern pattern = Pattern.compile(",\"(.*)\",\"(.+)\"");
+            Matcher matcher = pattern.matcher(line);
+            matcher.find();
+            qty = matcher.group(1);
+            uom = matcher.group(2);
+            stringToCheck = line.substring(1,line.length()-7-qty.length()-uom.length());
+            Pair<String, String> result = myMatcher.extract(stringToCheck);
+            try {
+                qtyResult = result.getFirst();
+                uomResult = result.getSecond();
+                if (qty.equals(qtyResult) && uom.equals(uomResult)) {
+                    correct++;
+                }
+            } catch (NullPointerException e) {
+
+            }
+            total++;
+        }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(correct/total);
+        Assert.assertTrue(correct/total > 0.2);
     }
 }
 
