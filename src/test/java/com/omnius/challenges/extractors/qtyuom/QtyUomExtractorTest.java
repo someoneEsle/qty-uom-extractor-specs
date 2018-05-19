@@ -1,6 +1,5 @@
 package com.omnius.challenges.extractors.qtyuom;
 
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -8,8 +7,6 @@ import com.omnius.challenges.extractors.qtyuom.utils.LeftMostUOMExtractor;
 import com.omnius.challenges.extractors.qtyuom.utils.Pair;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
